@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebOS</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; font-family: Arial, sans-serif; }
+    body {
+      background: linear-gradient(135deg, #182848, #4b6cb7);
+      color: white;
+    }
+    .desktop {
+      width: 100vw; height: 100vh; position: relative;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(255,255,255,.12), transparent 30%),
+        linear-gradient(135deg, #101827, #244c7a);
+    }
+    .icons { padding: 20px; display: flex; flex-direction: column; gap: 18px; width: 90px; }
+    .icon {
+      width: 70px; padding: 8px 3px; border-radius: 8px; text-align: center;
+      cursor: pointer; user-select: none;
+    }
+    .icon:hover { background: rgba(255,255,255,.16); }
+    .icon .emoji { font-size: 34px; display:block; }
+    .icon span { font-size: 12px; text-shadow: 0 1px 3px #000; }
+    .taskbar {
+      position: absolute; bottom: 0; left: 0; right: 0; height: 54px;
+      display: flex; align-items: center; gap: 8px; padding: 7px 10px;
+      background: rgba(12,16,25,.85); backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(255,255,255,.15);
+    }
+    .start {
+      width: 42px; height: 40px; border: 0; border-radius: 9px;
+      background: rgba(255,255,255,.12); color: white; font-size: 22px; cursor:pointer;
+    }
+    .start:hover { background: rgba(255,255,255,.22); }
+    .clock { margin-left: auto; font-size: 13px; opacity: .9; }
+    .window {
+      position: absolute; width: min(700px, 90vw); height: min(500px, 72vh);
+      left: 50%; top: 45%; transform: translate(-50%, -50%);
+      background: #f4f6f8; color: #111; border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.45); overflow: hidden;
+      display: none;
+    }
+    .titlebar {
+      height: 42px; background: #202938; color: white;
+      display:flex; align-items:center; padding: 0 10px; cursor: move;
+    }
+    .title { flex:1; font-size:14px; font-weight:bold; }
+    .controls button {
+      border:0; background:transparent; color:white; font-size:17px;
+      width:32px; height:30px; cursor:pointer; border-radius:5px;
+    }
+    .controls button:hover { background:rgba(255,255,255,.15); }
+    .content { height: calc(100% - 42px); overflow:auto; padding:18px; }
+    .browserbar { display:flex; gap:7px; margin-bottom:12px; }
+    .browserbar input {
+      flex:1; padding:10px; border:1px solid #bbb; border-radius:7px;
+      font-size:14px;
+    }
+    .browserbar button, .primary {
+      border:0; padding:10px 14px; border-radius:7px; background:#2463eb;
+      color:white; cursor:pointer;
+    }
+    iframe { width:100%; height:calc(100% - 55px); border:1px solid #ccc; border-radius:7px; }
+    .menu {
+      position:absolute; bottom:62px; left:10px; width:260px; padding:10px;
+      background:rgba(25,31,43,.96); border:1px solid rgba(255,255,255,.15);
+      border-radius:12px; display:none; box-shadow:0 15px 40px #0008;
+    }
+    .menu h3 { margin:8px; }
+    .menu button {
+      display:block; width:100%; padding:11px; margin:4px 0; text-align:left;
+      border:0; border-radius:7px; background:transparent; color:white; cursor:pointer;
+    }
+    .menu button:hover { background:rgba(255,255,255,.12); }
+    .notes {
+      width:100%; height:100%; resize:none; border:0; outline:0; padding:10px;
+      font:14px Consolas, monospace;
+    }
+    .calc { max-width:300px; margin:auto; }
+    .calc input { width:100%; padding:14px; font-size:24px; text-align:right; margin-bottom:8px; }
+    .keys { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
+    .keys button { padding:16px; font-size:18px; border:1px solid #ccc; border-radius:7px; cursor:pointer; }
+  </style>
+</head>
+<body>
+<div class="desktop">
+  <div class="icons">
+    <div class="icon" onclick="openApp('browser')"><span class="emoji">🌐</span><span>Google</span></div>
+    <div class="icon" onclick="openApp('notes')"><span class="emoji">📝</span><span>Notas</span></div>
+    <div class="icon" onclick="openApp('calc')"><span class="emoji">🧮</span><span>Calculadora</span></div>
+  </div>
+
+  <div id="browser" class="window">
+    <div class="titlebar"><div class="title">🌐 Google</div><div class="controls"><button onclick="closeApp('browser')">×</button></div></div>
+    <div class="content">
+      <div class="browserbar">
+        <input id="url" value="https://www.google.com" placeholder="Escribe una URL...">
+        <button onclick="go()">Ir</button>
+      </div>
+      <iframe id="page" src="https://www.google.com" title="Navegador"></iframe>
+    </div>
+  </div>
+
+  <div id="notes" class="window">
+    <div class="titlebar"><div class="title">📝 Notas</div><div class="controls"><button onclick="closeApp('notes')">×</button></div></div>
+    <div class="content" style="padding:0"><textarea class="notes" placeholder="Escribe aquí..."></textarea></div>
+  </div>
+
+  <div id="calc" class="window">
+    <div class="titlebar"><div class="title">🧮 Calculadora</div><div class="controls"><button onclick="closeApp('calc')">×</button></div></div>
+    <div class="content">
+      <div class="calc">
+        <input id="display" readonly>
+        <div class="keys">
+          <button onclick="c()">C</button><button onclick="add('/')">÷</button><button onclick="add('*')">×</button><button onclick="add('-')">−</button>
+          <button onclick="add('7')">7</button><button onclick="add('8')">8</button><button onclick="add('9')">9</button><button onclick="add('+')">+</button>
+          <button onclick="add('4')">4</button><button onclick="add('5')">5</button><button onclick="add('6')">6</button><button onclick="result()">=</button>
+          <button onclick="add('1')">1</button><button onclick="add('2')">2</button><button onclick="add('3')">3</button><button onclick="add('0')">0</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="menu" class="menu">
+    <h3>WebOS</h3>
+    <button onclick="openApp('browser');toggleMenu()">🌐 Google</button>
+    <button onclick="openApp('notes');toggleMenu()">📝 Notas</button>
+    <button onclick="openApp('calc');toggleMenu()">🧮 Calculadora</button>
+  </div>
+
+  <div class="taskbar">
+    <button class="start" onclick="toggleMenu()">⊞</button>
+    <div class="clock" id="clock"></div>
+  </div>
+</div>
+
+<script>
+function openApp(id){ document.getElementById(id).style.display='block'; }
+function closeApp(id){ document.getElementById(id).style.display='none'; }
+function toggleMenu(){ const m=document.getElementById('menu'); m.style.display=m.style.display==='block'?'none':'block'; }
+
+function go(){
+  let u=document.getElementById('url').value.trim();
+  if(!u) return;
+  if(!/^https?:\/\//i.test(u)) u='https://'+u;
+  document.getElementById('url').value=u;
+  document.getElementById('page').src=u;
+}
+
+document.getElementById('url').addEventListener('keydown', e=>{if(e.key==='Enter')go();});
+
+function clock(){
+  document.getElementById('clock').textContent=new Date().toLocaleString('es-MX',{dateStyle:'short',timeStyle:'short'});
+}
+setInterval(clock,1000); clock();
+
+let expr='';
+function add(x){expr+=x; document.getElementById('display').value=expr;}
+function c(){expr=''; document.getElementById('display').value='';}
+function result(){
+  try { expr=String(Function('"use strict";return ('+expr+')')()); document.getElementById('display').value=expr; }
+  catch { document.getElementById('display').value='Error'; expr=''; }
+}
+</script>
+</body>
+</html>
