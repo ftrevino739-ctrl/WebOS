@@ -143,6 +143,16 @@ h1{font-weight:500;margin:0 0 8px}
 .cl .rn{border:1px solid var(--line);background:var(--win);outline:none;font:inherit}.cl .dx{font-size:20px;padding:6px 10px}
 .rb.mic{width:44px;height:44px}.rb.rec{background:#e5484d;color:#fff;animation:pl 1s infinite}@keyframes pl{50%{opacity:.6}}
 .page{position:relative}.fr{position:absolute;inset:0;display:flex;flex-direction:column}.fr iframe{flex:1;border:0;width:100%;background:#fff}.frb{padding:6px 12px;font-size:12px;color:var(--mute);border-top:1px solid var(--line);background:var(--win)}
+.cm{position:relative;flex:none}.mb{border:0;background:var(--omni);color:var(--ink);padding:8px 14px;border-radius:10px;cursor:pointer;font-size:14px}
+.mmenu{display:none;position:absolute;top:42px;left:0;background:var(--win);border:1px solid var(--line);border-radius:18px;padding:6px;z-index:5;box-shadow:0 10px 30px rgba(0,0,0,.35);min-width:210px}.mmenu.show{display:block}
+.mmenu button{display:flex;gap:10px;align-items:center;width:100%;border:0;background:none;color:var(--ink);padding:11px 12px;font-size:15px;cursor:pointer;text-align:left;border-radius:10px}.mmenu button:hover{background:var(--omni)}.mmenu span{width:16px}.mmenu i{font-style:normal;width:20px;color:var(--mute)}
+.cmain{flex:1;display:flex;flex-direction:column;gap:10px;min-height:0;overflow:auto}
+.sci{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;flex:none}.sci button{border:0;border-radius:8px;background:var(--omni);color:var(--ink);padding:9px 0;font-size:14px;cursor:pointer}
+.cv{display:flex;flex-direction:column;gap:12px;padding:6px}.cv select,.cv input{height:46px;border-radius:12px;border:1px solid var(--line);background:var(--omni);color:var(--ink);padding:0 12px;font-size:16px}.cres{font-size:30px;font-weight:600;padding:10px 4px;word-break:break-all}.sw{text-align:center;color:var(--mute);cursor:pointer}
+.yt{display:flex;flex-direction:column;height:100%}.yh{display:flex;gap:8px;padding:10px;border-bottom:1px solid var(--line);flex:none}.yh input{flex:1;min-width:0;height:40px;border-radius:20px;border:1px solid var(--line);background:var(--omni);color:var(--ink);padding:0 16px;font-size:15px;outline:none}.yh button{height:40px;padding:0 16px;border-radius:20px;border:0;background:#ff0033;color:#fff;font-weight:600;cursor:pointer}
+.yb{flex:1;overflow:auto;padding:10px;min-height:0}.yg{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}.yc{border:0;background:none;color:var(--ink);text-align:left;cursor:pointer;padding:0}.yc img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:12px;background:var(--omni)}.yc b{display:block;font-size:14px;margin-top:6px;font-weight:500}.yc small{color:var(--mute)}
+.yp{position:relative;width:100%;aspect-ratio:16/9}.yp iframe{position:absolute;inset:0;width:100%;height:100%;border:0;border-radius:12px}.ybk{margin-bottom:8px;border:0;background:var(--omni);color:var(--ink);border-radius:16px;padding:8px 14px;cursor:pointer}.ym{color:var(--mute);padding:24px;text-align:center}
+.ld{position:absolute;inset:0;display:grid;place-items:center;color:var(--mute);pointer-events:none}
 </style>
 </head>
 <body>
@@ -173,15 +183,16 @@ calc:'<svg viewBox="0 0 48 48"><rect width="48" height="48" rx="11" fill="#2b2f3
 browser:'<div style="background:#fff;display:grid;place-items:center"><div style="width:72%;aspect-ratio:1;border-radius:50%;background:conic-gradient(from -60deg,#ea4335 0 120deg,#fbbc05 120deg 240deg,#34a853 240deg);display:grid;place-items:center"><div style="width:42%;aspect-ratio:1;border-radius:50%;background:#4285f4;box-shadow:0 0 0 12% #fff;outline:3px solid #fff"></div></div></div>',
 ai:'<svg viewBox="0 0 48 48"><rect width="48" height="48" rx="11" fill="#d97757"/><g stroke="#faf6f0" stroke-width="3.4" stroke-linecap="round">'+[...Array(12)].map((_,i)=>{const a=i*Math.PI/6,r=i%2?11:15;return `<line x1="${24+4*Math.cos(a)}" y1="${24+4*Math.sin(a)}" x2="${24+r*Math.cos(a)}" y2="${24+r*Math.sin(a)}"/>`}).join('')+'</g></svg>'};
 document.querySelectorAll('[data-ic]').forEach(e=>e.innerHTML=IC[e.dataset.ic]);
+IC.yt='<svg viewBox="0 0 48 48"><rect width="48" height="48" rx="11" fill="#fff"/><rect x="6" y="12" width="36" height="24" rx="8" fill="#ff0033"/><path d="M20 18l10 6-10 6z" fill="#fff"/></svg>';
 let z=10,n=0;const wins={};
 const small=()=>innerWidth<700;
 
 function openApp(app){
   const id='w'+(++n),w=document.createElement('div');
   w.className='win';w.id=id;
-  const W=Math.min(innerWidth-20,app==='calc'?340:860),H=Math.min(innerHeight-90,app==='calc'?520:560);
+  const W=Math.min(innerWidth-20,app==='calc'?340:860),H=Math.min(innerHeight-90,app==='calc'?640:560);
   w.style.cssText=`width:${W}px;height:${H}px;left:${Math.max(10,(innerWidth-W)/2+n*18-40)}px;top:${50+n*18}px;z-index:${++z}`;
-  const name='<span class="mi">'+IC[app]+'</span> '+{calc:'Calculadora',browser:'Navegador',ai:'IA'}[app];
+  const name='<span class="mi">'+IC[app]+'</span> '+{calc:'Calculadora',browser:'Navegador',ai:'IA',yt:'YouTube'}[app];
   w.innerHTML=`<div class="title"><b style="display:flex;align-items:center;gap:8px">${name}</b><button class="wb" data-a="min" aria-label="Minimizar">–</button><button class="wb" data-a="max" aria-label="Maximizar">▢</button><button class="wb x" data-a="x" aria-label="Cerrar">✕</button></div><div class="body"></div>`;
   desk.appendChild(w);
   const tb=document.createElement('button');tb.className='tb';tb.innerHTML=name;tbs.appendChild(tb);
@@ -196,7 +207,7 @@ function openApp(app){
     if(a==='max')w.classList.toggle('max');
   });
   drag(w);
-  ({calc,browser,ai})[app]($('.body',w),w);
+  ({calc,browser,ai,yt:youtube})[app]($('.body',w),w);
   focus(id);
 }
 function focus(id){
@@ -229,48 +240,75 @@ function tick(){const d=new Date();$('#clock').innerHTML=d.toLocaleTimeString('e
 tick();setInterval(tick,20000);
 
 /* ---------- Calculadora ---------- */
+const RATES={USD:1,EUR:.92,MXN:18,GBP:.78,JPY:150,CAD:1.36,BRL:5.4,COP:4000,ARS:1000};let ratesLive=false;
+const UNITS={Longitud:{m:1,km:1000,cm:.01,mm:.001,mi:1609.344,ft:.3048,in:.0254},Peso:{kg:1,g:.001,lb:.45359237,oz:.028349523},Volumen:{L:1,mL:.001,gal:3.785411784,taza:.2365882365}};
+const FACT=n=>{n=Math.round(n);if(n<0||n>170)return NaN;let r=1;for(let i=2;i<=n;i++)r*=i;return r};
 function calc(root,w){
-  root.innerHTML=`<div class="calc"><div class="disp"><small></small><div>0</div></div><div class="keys"></div></div>`;
-  const hist=$('small',root),out=$('.disp div',root),keys=$('.keys',root);
-  let e='',fresh=false;
-  const L=['C','⌫','%','÷','7','8','9','×','4','5','6','−','1','2','3','+','±','0','.','='];
-  L.forEach(k=>{const b=document.createElement('button');b.textContent=k;
-    if('C⌫%÷×−+'.includes(k))b.className='op';if(k==='=')b.className='eq';
-    b.onclick=()=>press(k);keys.appendChild(b)});
-  const show=()=>out.textContent=e||'0';
+  root.innerHTML='<div class="calc"><div class="cm"><button class="mb"></button><div class="mmenu"></div></div><div class="cmain"></div></div>';
+  const mb=$('.mb',root),mm=$('.mmenu',root),main=$('.cmain',root);
+  let mode='basic',e='',fresh=false,deg=true,hist,out;
+  const NAMES={basic:'Básica',sci:'Científica',conv:'Convertir'};
+  function setMode(m){mode=m;mb.textContent=NAMES[m]+' ▾';mm.classList.remove('show');if(m==='conv')conv();else pad()}
+  mb.onclick=()=>{mm.innerHTML=Object.keys(NAMES).map(k=>`<button data-m="${k}"><span>${mode===k?'✓':''}</span><i>${{basic:'±',sci:'ƒ',conv:'⇄'}[k]}</i>${NAMES[k]}</button>`).join('');mm.classList.toggle('show')};
+  mm.onclick=ev=>{const b=ev.target.closest('[data-m]');if(b)setMode(b.dataset.m)};
+  function ev(s){
+    let x=s.replace(/÷/g,'/').replace(/×/g,'*').replace(/−/g,'-').replace(/π/g,'Math.PI').replace(/\be\b/g,'Math.E').replace(/√\(/g,'Math.sqrt(').replace(/sin\(/g,'SIN(').replace(/cos\(/g,'COS(').replace(/tan\(/g,'TAN(').replace(/log\(/g,'Math.log10(').replace(/ln\(/g,'Math.log(').replace(/(\d+(?:\.\d+)?)!/g,'FACT($1)').replace(/%/g,'/100').replace(/\^/g,'**');
+    const o=(x.match(/\(/g)||[]).length,c=(x.match(/\)/g)||[]).length;x+=')'.repeat(Math.max(0,o-c));
+    if(!/^[\d+\-*/.()\s]*$/.test(x.replace(/Math\.(PI|E|sqrt|log10|log)|SIN|COS|TAN|FACT/g,'')))throw 0;
+    const k=deg?Math.PI/180:1;
+    return Function('SIN','COS','TAN','FACT','"use strict";return('+x+')')(a=>Math.sin(a*k),a=>Math.cos(a*k),a=>Math.tan(a*k),FACT);
+  }
+  const OP=['÷','×','−','+','^','%','!','x²','1/x','=','⌫','±','C'];
   function press(k){
-    if(fresh&&/[0-9.]/.test(k))e='';fresh=false;
+    if(fresh&&!OP.includes(k))e='';
+    fresh=false;
     if(k==='C'){e='';hist.textContent=''}
     else if(k==='⌫')e=e.slice(0,-1);
     else if(k==='±'){const m=e.match(/(-?[\d.]+)$/);if(m)e=e.slice(0,m.index)+(m[1][0]==='-'?m[1].slice(1):'-'+m[1])}
-    else if(k==='='){
-      const ex=e.replace(/÷/g,'/').replace(/×/g,'*').replace(/−/g,'-').replace(/%/g,'/100');
-      if(!/^[\d+\-*/.() ]+$/.test(ex)||!ex)return;
-      try{let r=Function('"use strict";return('+ex+')')();
-        if(!isFinite(r))throw 0;
-        r=+r.toPrecision(12);hist.textContent=e+' =';e=String(r);fresh=true}
-      catch{hist.textContent=e;e='Error';fresh=true}
-    }else{
-      if('÷×−+'.includes(k)&&(!e||e==='Error')){if(k!=='−')return}
+    else if(k==='x²')e+='^2';
+    else if(k==='1/x'){if(e)e='1/('+e+')'}
+    else if(k==='='){if(!e)return;try{let r=ev(e);if(!isFinite(r))throw 0;r=+r.toPrecision(12);hist.textContent=e+' =';e=String(r);fresh=true}catch{hist.textContent=e;e='Error';fresh=true}}
+    else{
+      if('÷×−+'.includes(k)&&(!e||e==='Error')&&k!=='−')return;
       if('÷×−+'.includes(k)&&'÷×−+'.includes(e.slice(-1)))e=e.slice(0,-1);
       if(e==='Error')e='';
       e+=k;
     }
-    show();
+    out.textContent=e||'0';
   }
-  w.addEventListener('keydown',ev=>{
-    const m={'/':'÷','*':'×','-':'−','Enter':'=','Backspace':'⌫','Escape':'C'};
-    const k=m[ev.key]||ev.key;if(L.includes(k)){ev.preventDefault();press(k)}});
+  function pad(){
+    main.innerHTML='<div class="disp"><small></small><div>0</div></div>'+(mode==='sci'?'<div class="sci"></div>':'')+'<div class="keys"></div>';
+    hist=$('small',main);out=$('.disp div',main);
+    const keys=$('.keys',main);
+    ['C','⌫','%','÷','7','8','9','×','4','5','6','−','1','2','3','+','±','0','.','='].forEach(k=>{const b=document.createElement('button');b.textContent=k;if('C⌫%÷×−+'.includes(k))b.className='op';if(k==='=')b.className='eq';b.onclick=()=>press(k);keys.appendChild(b)});
+    if(mode==='sci'){const s=$('.sci',main);['Deg','sin(','cos(','tan(','!','π','e','log(','ln(','x²','(',')','√(','^','1/x'].forEach(k=>{const b=document.createElement('button');b.textContent=k==='Deg'?(deg?'Deg':'Rad'):k;b.onclick=()=>{if(k==='Deg'){deg=!deg;b.textContent=deg?'Deg':'Rad'}else press(k)};s.appendChild(b)})}
+    out.textContent=e||'0';
+  }
+  function conv(){
+    main.innerHTML='<div class="cv"><select class="ct" aria-label="Categoría"></select><input class="cin2" type="number" inputmode="decimal" value="1" aria-label="Cantidad"><select class="cf" aria-label="De"></select><div class="sw">⇅</div><select class="cto" aria-label="A"></select><div class="cres">—</div><small class="cn"></small></div>';
+    const ct=$('.ct',main),inp=$('.cin2',main),cf=$('.cf',main),cto=$('.cto',main),res=$('.cres',main),cn=$('.cn',main);
+    ct.innerHTML=['Moneda',...Object.keys(UNITS),'Temperatura'].map(c=>`<option>${c}</option>`).join('');
+    const names=()=>ct.value==='Moneda'?Object.keys(RATES):ct.value==='Temperatura'?['°C','°F','K']:Object.keys(UNITS[ct.value]);
+    const calc2=()=>{const v=parseFloat(inp.value);if(isNaN(v)){res.textContent='—';return}
+      let r;const a=cf.value,b=cto.value,c=ct.value;
+      if(c==='Moneda')r=v/RATES[a]*RATES[b];
+      else if(c==='Temperatura'){const C=a==='°C'?v:a==='°F'?(v-32)*5/9:v-273.15;r=b==='°C'?C:b==='°F'?C*9/5+32:C+273.15}
+      else r=v*UNITS[c][a]/UNITS[c][b];
+      res.textContent=r.toLocaleString('es',{maximumFractionDigits:6})+' '+b};
+    const fill=()=>{const n=names(),h=n.map(x=>`<option>${x}</option>`).join('');cf.innerHTML=h;cto.innerHTML=h;cto.selectedIndex=Math.min(1,n.length-1);cn.textContent=ct.value==='Moneda'?(ratesLive?'Tasas en vivo':'Tasas aproximadas (sin conexión)'):'';calc2()};
+    ct.onchange=fill;inp.oninput=calc2;cf.onchange=calc2;cto.onchange=calc2;
+    $('.sw',main).onclick=()=>{const t=cf.value;cf.value=cto.value;cto.value=t;calc2()};
+    fill();
+    if(!ratesLive)fetch('https://api.frankfurter.app/latest?from=USD').then(r=>r.json()).then(j=>{Object.assign(RATES,j.rates);ratesLive=true;if(ct.isConnected&&ct.value==='Moneda')fill()}).catch(()=>{});
+  }
+  w.addEventListener('keydown',evn=>{if(mode==='conv')return;const m={'/':'÷','*':'×','-':'−',Enter:'=',Backspace:'⌫',Escape:'C'};const k=m[evn.key]||evn.key;if('0123456789.+%()^!'.includes(k)||['÷','×','−','=','⌫','C'].includes(k)){evn.preventDefault();press(k)}});
   w.tabIndex=0;w.style.outline='none';
+  setMode('basic');
 }
 
 /* ---------- Navegador ---------- */
-const SITES={
- 'enciclopedia.local':{t:'Enciclopedia',h:`<div class="pad"><h1>Chromium</h1><p>Chromium es un proyecto de navegador de código abierto que sirve de base a Google Chrome, Microsoft Edge y otros. Usa el motor de renderizado Blink y el motor JavaScript V8.</p><p>Cada pestaña se ejecuta en un proceso aislado (sandbox) para mejorar la seguridad y la estabilidad.</p><p><a class="link" data-go="chrome://version">Ver la versión de este navegador</a></p></div>`},
- 'noticias.local':{t:'Noticias',h:`<div class="pad"><h1>Noticias del día</h1><p><b>Tecnología:</b> Los sistemas operativos web ganan terreno gracias a las nuevas APIs del navegador.</p><p><b>Ciencia:</b> Un nuevo telescopio detecta una galaxia más antigua de lo esperado.</p><p><b>Cultura:</b> El festival de cine independiente anuncia su programación.</p></div>`},
- 'juego.local':{t:'Mini juego',h:`<div class="pad"><h1>Adivina el número</h1><p>Piensa en un número del 1 al 10 y pulsa para ver si coincide.</p><button class="link" data-roll style="background:none;border:1px solid var(--line);padding:8px 16px;border-radius:8px;font-size:16px">Tirar dado</button><p id="roll" style="font-size:48px;margin:12px 0">🎲</p></div>`}
-};
-const BM=[['📚 Enciclopedia','enciclopedia.local'],['📰 Noticias','noticias.local'],['🎮 Juego','juego.local'],['ℹ️ Versión','chrome://version']];
+const DDG0="https://holy-firefly-982c.fert0480.workers.dev";
+const EP=()=>(LS.get('wos:ddg','')||DDG0).replace(/\/$/,'');
 const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
 function resolve(v){
@@ -281,35 +319,26 @@ function resolve(v){
   return 'chrome://search?q='+encodeURIComponent(v);
 }
 function render(url){
-  if(url==='chrome://newtab')return{t:'Nueva pestaña',h:`<div class="center"><div class="logo"><span>S</span><span>e</span><span>a</span><span>r</span><span>c</span><span>h</span></div><input class="sb" data-sb placeholder="Busca o escribe una URL" aria-label="Buscar"><button data-ext style="background:none;border:1px solid var(--line);padding:8px 16px;border-radius:20px;font-size:14px;margin-top:14px;color:var(--ink);cursor:pointer">Buscar en DuckDuckGo ↗</button><div class="tiles">${BM.map(b=>`<button class="tile" data-go="${b[1]}"><i>${b[0].split(' ')[0]}</i>${b[0].split(' ').slice(1).join(' ')}</button>`).join('')}</div></div>`};
-  if(url==='chrome://version')return{t:'Acerca de Chromium',h:`<div class="pad"><h1>Acerca de Chromium</h1><p>Versión 126.0.0.0 (emulada)<br>Motor: Blink / V8 (simulados)<br>Agente: ${esc(navigator.userAgent)}</p></div>`};
-  if(url.startsWith('chrome://search')){
-    const q=decodeURIComponent((url.split('q=')[1]||''));
-    const r=Object.entries(SITES).map(([u,s])=>`<div class="res"><a data-go="${u}">${s.t} — ${u}</a><small>${u}</small>Resultado interno relacionado con «${esc(q)}».</div>`).join('');
-    return{t:q+' - Búsqueda',h:`<div class="pad"><div id="ddgbox"></div><details style="margin:12px 0"><summary class="link" style="font-size:14px">Configurar DuckDuckGo</summary><input id="ddgep" class="sb" style="height:38px;margin:8px 0;font-size:14px" placeholder="https://tu-servidor/search" value="${esc(LS.get('wos:ddg','https://holy-firefly-982c.fert0480.workers.dev'))}"><button data-ddgsave class="link" style="font-size:14px;background:none;border:1px solid var(--line);padding:6px 12px;border-radius:14px;color:var(--ink)">Guardar</button></details><a class="link" data-ext data-q="${esc(q)}">Abrir «${esc(q)}» en duckduckgo.com ↗</a><br><br><small style="color:var(--mute)">Resultados internos</small><br>${r}</div>`};
-  }
-  if(SITES[url])return{t:SITES[url].t,h:SITES[url].h};
-  if(/^https?:\/\//.test(url)||/^[\w-]+(\.[\w-]+)+/.test(url)){const s=/^https?:/.test(url)?url:'https://'+url;return{t:url.replace(/^https?:\/\//,'').slice(0,40),h:`<div class="fr"><iframe src="${esc(s)}" referrerpolicy="no-referrer" sandbox="allow-scripts allow-forms allow-popups allow-same-origin"></iframe><div class="frb">¿La página sale en blanco? Ese sitio no permite abrirse aquí. <a class="link" style="font-size:12px" data-url="${esc(s)}">Abrir en pestaña nueva ↗</a></div></div>`}}
-  return{t:'No se puede acceder',h:`<div class="pad err"><div class="dino">   __\n  / _)\n_/ /\n(__/</div><h1>No se puede acceder a este sitio</h1><p>No se ha podido cargar <b>${esc(url)}</b>. Por seguridad, este sistema se ejecuta en una página aislada y solo muestra sitios internos.</p><code>ERR_BLOCKED_BY_CLIENT</code><p><a class="link" data-go="chrome://newtab">Ir a la página de inicio</a></p></div>`};
+  if(url==='chrome://newtab'||url.startsWith('chrome://')&&!url.startsWith('chrome://search'))return{t:'Nueva pestaña',h:`<div class="center"><div class="logo"><span>S</span><span>e</span><span>a</span><span>r</span><span>c</span><span>h</span></div><input class="sb" data-sb placeholder="Busca o escribe una URL" aria-label="Buscar"></div>`};
+  if(url.startsWith('chrome://search')){const q=decodeURIComponent(url.split('q=')[1]||'');return{t:q+' - Búsqueda',h:`<div class="pad"><div id="ddgbox"></div></div>`}}
+  const s=/^https?:/.test(url)?url:'https://'+url;
+  return{t:url.replace(/^https?:\/\//,'').slice(0,40),h:`<div class="fr"><div class="ld">Cargando…</div><iframe src="${esc(s)}" referrerpolicy="no-referrer" allow="fullscreen; autoplay; clipboard-write; encrypted-media; picture-in-picture" allowfullscreen sandbox="allow-scripts allow-forms allow-popups allow-same-origin allow-presentation"></iframe></div>`};
 }
 function browser(root,w){
-  root.innerHTML=`<div class="tabs"></div><div class="nav"><button data-b="back" aria-label="Atrás">←</button><button data-b="fwd" aria-label="Adelante">→</button><button data-b="rl" aria-label="Recargar">⟳</button><input class="omni" placeholder="Busca en la web o escribe una URL" aria-label="Barra de direcciones"></div><div class="bm"></div><div class="page"></div>`;
-  const tabsEl=$('.tabs',root),om=$('.omni',root),page=$('.page',root),bm=$('.bm',root);
-  const [back,fwd]=root.querySelectorAll('.nav>button');
+  root.innerHTML=`<div class="tabs"></div><div class="nav"><button aria-label="Atrás">←</button><button aria-label="Adelante">→</button><button aria-label="Recargar">⟳</button><input class="omni" placeholder="Busca en la web o escribe una URL" aria-label="Barra de direcciones"></div><div class="page"></div>`;
+  const tabsEl=$('.tabs',root),om=$('.omni',root),page=$('.page',root),[back,fwd,rl]=root.querySelectorAll('.nav>button');
   let tabs=[],cur=0;
-  BM.forEach(b=>{const x=document.createElement('button');x.textContent=b[0];x.onclick=()=>go(b[1]);bm.appendChild(x)});
+  const T=()=>tabs[cur],U=()=>T().h[T().i];
   async function ddg(u){
-    const q=decodeURIComponent(u.split('q=')[1]||''),ep=LS.get('wos:ddg','https://holy-firefly-982c.fert0480.workers.dev'),box=$('#ddgbox',page);
-    if(!box)return;
-    if(!ep){box.innerHTML='<small style="color:var(--mute)">Conecta tu servidor de búsqueda en «Configurar DuckDuckGo» para ver resultados reales.</small>';return}
-    box.textContent='Buscando en DuckDuckGo…';
+    const q=decodeURIComponent(u.split('q=')[1]||''),box=$('#ddgbox',page);if(!box)return;
+    box.innerHTML='<small style="color:var(--mute)">Buscando…</small>';
     try{
-      const r=await fetch(ep+(ep.includes('?')?'&':'?')+'q='+encodeURIComponent(q)),j=await r.json(),res=j.organic_results||[];
-      box.innerHTML=res.map(x=>`<div class="res"><a data-go="${esc(x.link||'')}">${esc(x.title||x.link||'')}</a><small>${esc(x.displayed_link||x.link||'')}</small>${esc(x.snippet||'')}</div>`).join('')||'Sin resultados.';
-    }catch{box.innerHTML='<small style="color:var(--mute)">No se pudo conectar con tu servidor. Las páginas publicadas en claude.ai bloquean conexiones externas: aloja esta página en tu propio sitio.</small>'}
+      const r=await fetch(EP()+'/?q='+encodeURIComponent(q)),j=await r.json();
+      if(j.error)throw 0;
+      box.innerHTML=(j.organic_results||[]).map(x=>`<div class="res"><a data-go="${esc(x.link||'')}">${esc(x.title||x.link||'')}</a><small>${esc(x.displayed_link||x.link||'')}</small>${esc(x.snippet||'')}</div>`).join('')||'<small style="color:var(--mute)">Sin resultados.</small>';
+    }catch{box.innerHTML='<small style="color:var(--mute)">No se pudo buscar ahora. Revisa tu conexión e inténtalo de nuevo.</small>'}
   }
   function newTab(u='chrome://newtab'){tabs.push({h:[u],i:0});cur=tabs.length-1;draw()}
-  const T=()=>tabs[cur],U=()=>T().h[T().i];
   function go(v){const u=resolve(v),t=T();t.h=t.h.slice(0,t.i+1);t.h.push(u);t.i++;draw()}
   function draw(){
     tabsEl.innerHTML='';
@@ -320,24 +349,35 @@ function browser(root,w){
       tabsEl.appendChild(d)});
     const p=document.createElement('button');p.className='plus';p.textContent='+';p.setAttribute('aria-label','Nueva pestaña');p.onclick=()=>newTab();tabsEl.appendChild(p);
     const u=U(),r=render(u);
-    page.innerHTML=r.h;page.scrollTop=0;if(u.startsWith('chrome://search'))ddg(u);
-    om.value=u==='chrome://newtab'?'':(/^chrome:/.test(u)?u:'https://'+u);
+    page.innerHTML=r.h;page.scrollTop=0;
+    const f=$('iframe',page);if(f)f.onload=()=>{const l=$('.ld',page);if(l)l.remove()};
+    if(u.startsWith('chrome://search'))ddg(u);
+    om.value=/^chrome:\/\/(newtab)?$/.test(u)?'':(/^chrome:/.test(u)?u:(/^https?:/.test(u)?u:'https://'+u));
     back.disabled=T().i===0;fwd.disabled=T().i>=T().h.length-1;
     const sb=$('[data-sb]',page);if(sb)sb.onkeydown=e=>{if(e.key==='Enter')go(sb.value)};
   }
-  page.addEventListener('click',e=>{
-    const g=e.target.closest('[data-go]');if(g)go(g.dataset.go);
-    const ux=e.target.closest('[data-url]');if(ux&&/^https?:/.test(ux.dataset.url))window.open(ux.dataset.url,'_blank','noopener');
-    if(e.target.closest('[data-ddgsave]')){LS.set('wos:ddg',$('#ddgep',page).value.trim());ddg(U())}
-    const x=e.target.closest('[data-ext]');if(x){const sb=$('[data-sb]',page);window.open('https://duckduckgo.com/?q='+encodeURIComponent(x.dataset.q||(sb&&sb.value)||''),'_blank','noopener')}
-    if(e.target.closest('[data-roll]'))$('#roll',page).textContent='🎲 '+(1+Math.floor(Math.random()*10));
-  });
+  page.addEventListener('click',e=>{const g=e.target.closest('[data-go]');if(g)go(g.dataset.go)});
   om.addEventListener('keydown',e=>{if(e.key==='Enter'){go(om.value);om.blur()}});
   om.addEventListener('focus',()=>om.select());
-  back.onclick=()=>{T().i--;draw()};fwd.onclick=()=>{T().i++;draw()};
-  $('[data-b=rl]',root).onclick=draw;
+  back.onclick=()=>{T().i--;draw()};fwd.onclick=()=>{T().i++;draw()};rl.onclick=draw;
   newTab();
 }
+
+/* ---------- YouTube ---------- */
+function youtube(root){
+  root.innerHTML=`<div class="yt"><div class="yh"><input placeholder="Buscar en YouTube o pegar un enlace" aria-label="Buscar videos"><button>Buscar</button></div><div class="yb"><div class="ym">Busca un video o pega un enlace de YouTube.</div></div></div>`;
+  const inp=$('input',root),yb=$('.yb',root),HOME='<div class="ym">Busca un video o pega un enlace de YouTube.</div>';let last=null;
+  const dec=s=>{const t=document.createElement('textarea');t.innerHTML=s;return t.value};
+  const vid=s=>{const m=s.match(/(?:youtu\.be\/|[?&]v=|embed\/|shorts\/|live\/)([\w-]{11})/)||s.match(/^([\w-]{11})$/);return m&&m[1]};
+  const grid=items=>{yb.innerHTML='<div class="yg"></div>';const g=$('.yg',yb);items.forEach(it=>{const b=document.createElement('button');b.className='yc';const im=new Image();im.src=it.thumb;im.alt='';const t=document.createElement('b'),c=document.createElement('small');t.textContent=dec(it.title);c.textContent=dec(it.channel);b.append(im,t,c);b.onclick=()=>play(it.id);g.appendChild(b)})};
+  function play(id){yb.innerHTML='<button class="ybk">← Resultados</button><div class="yp"><iframe allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>';$('iframe',yb).src='https://www.youtube-nocookie.com/embed/'+id+'?autoplay=1&rel=0';$('.ybk',yb).onclick=()=>{if(last)grid(last);else yb.innerHTML=HOME}}
+  async function go(){const q=inp.value.trim();if(!q)return;const id=vid(q);if(id)return play(id);
+    yb.innerHTML='<div class="ym">Buscando…</div>';
+    try{const r=await fetch(EP()+'/yt?q='+encodeURIComponent(q)),j=await r.json();if(j.error)throw 0;last=j.items||[];if(last.length)grid(last);else yb.innerHTML='<div class="ym">Sin resultados.</div>'}
+    catch{yb.innerHTML='<div class="ym">No se pudo buscar ahora. Puedes pegar el enlace de un video para reproducirlo.</div>'}}
+  $('button',root).onclick=go;inp.onkeydown=e=>{if(e.key==='Enter')go()};
+}
+
 /* ---------- IA ---------- */
 const MODELS=[['claude-fable-5-1','Fable 5.1','Para tus desafíos más difíciles','complex'],['claude-opus-5-5','Opus 5.5','Para trabajo complejo y tareas cotidianas','complex'],['claude-sonnet-5-5','Sonnet 5.5','Más eficiente para tareas más simples','default'],['claude-haiku-5-5','Haiku 5.5','Más rápido para respuestas rápidas','quick']];
 const EFF=['Bajo','Medio','Alto'],EFI={Bajo:'Responde de forma muy breve y directa.',Medio:'',Alto:'Razona con cuidado y responde con detalle y precisión.'};
@@ -367,12 +407,12 @@ function ai(root){
         inp.onkeydown=e=>{if(e.key==='Enter')inp.blur();if(e.key==='Escape'){inp.value='';inp.blur()}}}};
     $('.ai',root).appendChild(m);
   }
-  function load(id){if(ctl)ctl.abort();busy=false;sd.disabled=!sample;curId=id;const c=cur();hist=c.msgs;if(c.model&&MODELS.some(m=>m[0]===c.model))model=c.model;eff=c.eff||eff;title.textContent=c.title;am.innerHTML='';if(!hist.length)empty();hist.forEach(m=>add(m.role==='user'?'u':'a',m.content));setPill();renderList()}
+  function load(id){if(ctl)ctl.abort();busy=false;sd.disabled=false;curId=id;const c=cur();hist=c.msgs;if(c.model&&MODELS.some(m=>m[0]===c.model))model=c.model;eff=c.eff||eff;title.textContent=c.title;am.innerHTML='';if(!hist.length)empty();hist.forEach(m=>add(m.role==='user'?'u':'a',m.content));setPill();renderList()}
   function newChat(){const c={id:'c'+Date.now(),title:'Chat nuevo',model,eff,msgs:[]};S.d.chats.unshift(c);save();load(c.id);drw.classList.remove('open')}
   function sheet(){sh.innerHTML=`<div class="sh"><button class="hb" data-a="xs" aria-label="Cerrar">✕</button><b>Seleccionar modelo</b><span style="width:38px"></span></div><div class="card">${MODELS.map(m=>`<button class="mo" data-m="${m[0]}"><span><b>${m[1]}</b><small>${m[2]}</small></span>${m[0]===model?'<i>✓</i>':''}</button>`).join('')}</div><div class="card"><button class="mo" data-e="1"><b>Esfuerzo</b><small>${eff} ›</small></button></div>`;sh.classList.add('show')}
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR)mic.style.display='none';
   let rec=null;
-  function dictate(){if(rec){rec.stop();return}try{rec=new SR();rec.lang='es-ES';rec.onresult=e=>{ta.value+=(ta.value?' ':'')+e.results[0][0].transcript};rec.onend=rec.onerror=()=>{rec=null;mic.classList.remove('rec')};rec.start();mic.classList.add('rec')}catch{rec=null}}
+  function dictate(){if(rec){rec.stop();return}try{rec=new SR();rec.lang='es-ES';let got=false;rec.onresult=e=>{got=true;ta.value+=(ta.value?' ':'')+e.results[0][0].transcript};rec.onerror=()=>{rec=null;mic.classList.remove('rec')};rec.onend=()=>{rec=null;mic.classList.remove('rec');if(got)go()};rec.start();mic.classList.add('rec')}catch{rec=null}}
   root.onclick=e=>{
     if(!e.target.closest('.ctx'))closeMenu();const t=e.target.closest('[data-a],[data-m],[data-e],[data-c],[data-k]');if(!t)return;
     const a=t.dataset.a,D=t.dataset;
@@ -394,7 +434,7 @@ function ai(root){
   ta.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();go()}};
   async function go(){
     const q=ta.value.trim()||(pend.length?'Describe la imagen.':'');
-    if(!q||busy||!sample)return;
+    if(!q||busy)return;
     const c=cur(),mine=hist;
     ta.value='';ta.style.height='';busy=true;sd.disabled=true;c.model=model;c.eff=eff;
     if(!mine.length){am.innerHTML='';c.title=q.slice(0,30);title.textContent=c.title;renderList()}
@@ -409,20 +449,30 @@ function ai(root){
       const r=await sample(input,{model,modelTier:MODELS.find(x=>x[0]===model)[3],...(imgs.length?{images:imgs}:{}),cache:false,signal:ctl.signal,onText:({text})=>{out.textContent=text;am.scrollTop=am.scrollHeight}});
       out.textContent=r.text;mine.push({role:'assistant',content:r.text});save();
     }catch(e){out.className='e';out.textContent=(e&&e.message)||'No se pudo obtener respuesta.';mine.pop()}
-    if(mine===hist){busy=false;sd.disabled=!sample}
+    if(mine===hist){busy=false;sd.disabled=false}
   }
   if(S.d.chats.length)load(S.d.chats[0].id);else newChat();
-  claude.use('sample').then(s=>{sample=s;sd.disabled=!s;if(!s)add('e','La IA no está disponible en esta vista. Ábrela desde claude.ai con tu sesión iniciada.')}).catch(()=>{sd.disabled=true});
+  const b64=b=>new Promise(r=>{const f=new FileReader();f.onload=()=>r(f.result.split(',')[1]);f.readAsDataURL(b)});
+  let real=null;
+  sample=async(input,o)=>{
+    if(real)return real(input,o);
+    const msgs=input.map(m=>({role:m.role,content:m.content}));
+    if(o.images&&o.images.length){const last=msgs[msgs.length-1];last.content=[...await Promise.all(o.images.map(async b=>({type:'image',source:{type:'base64',media_type:b.type||'image/jpeg',data:await b64(b)}}))),{type:'text',text:last.content}]}
+    const r=await fetch(EP()+'/ai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:o.model,messages:msgs}),signal:o.signal});
+    const j=await r.json();if(!r.ok||j.error)throw {message:(j.error&&j.error.message)||j.error||'Error del servidor'};
+    return {text:(j.content||[]).map(x=>x.text||'').join('')};
+  };
+  if(window.claude)claude.use('sample').then(s=>{real=s}).catch(()=>{});
 }
 
 /* ---------- Sistema: cuentas, apps, lanzador ---------- */
-const APPS={calc:'Calculadora',browser:'Navegador',ai:'IA'};
+const APPS={calc:'Calculadora',browser:'Navegador',ai:'IA',yt:'YouTube'};
 const LS={get(k,d){try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch{return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}};
 const S={user:null,d:null};
-const defD=()=>({pins:['calc','browser','ai'],desk:['calc','browser','ai'],chats:[]});
+const defD=()=>({pins:['calc','browser','ai','yt'],desk:['calc','browser','ai','yt'],chats:[]});
 const save=()=>LS.set('wos:u:'+(S.user||'_g'),S.d);
 const H=async(u,p)=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(u+':'+p)))].map(b=>b.toString(16).padStart(2,'0')).join('');
-function loadU(u){S.user=u;S.d=LS.get('wos:u:'+(u||'_g'),null)||defD();['pins','desk'].forEach(k=>S.d[k]=(S.d[k]||[]).filter(a=>APPS[a]));S.d.chats=S.d.chats||[];LS.set('wos:cur',u);rend()}
+function loadU(u){S.user=u;S.d=LS.get('wos:u:'+(u||'_g'),null)||defD();['pins','desk'].forEach(k=>S.d[k]=(S.d[k]||[]).filter(a=>APPS[a]));S.d.chats=S.d.chats||[];if(!S.d.v2){S.d.v2=1;['pins','desk'].forEach(k=>{if(!S.d[k].includes('yt'))S.d[k].push('yt')});save()}LS.set('wos:cur',u);rend()}
 function sw(u){Object.keys(wins).forEach(k=>{wins[k].w.remove();wins[k].tb.remove();delete wins[k]});loadU(u)}
 function tiles(){const f=($('#lq').value||'').toLowerCase(),D=S.d;
   $('#apps').innerHTML=Object.keys(APPS).filter(a=>APPS[a].toLowerCase().includes(f)).map(a=>`<div class="tl" draggable="true" data-d="${a}"><button data-app="${a}"><span class="mi">${IC[a]}</span>${APPS[a]}</button><div class="pb"><button data-pin="${a}" data-k="pins" class="${D.pins.includes(a)?'on':''}">Barra</button><button data-pin="${a}" data-k="desk" class="${D.desk.includes(a)?'on':''}">Inicio</button></div></div>`).join('')}
