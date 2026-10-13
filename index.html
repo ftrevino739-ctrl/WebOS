@@ -382,9 +382,9 @@ function youtube(root){
 const MODELS=[['claude-fable-5-1','Fable 5.1','Para tus desafíos más difíciles','complex'],['claude-opus-5-5','Opus 5.5','Para trabajo complejo y tareas cotidianas','complex'],['claude-sonnet-5-5','Sonnet 5.5','Más eficiente para tareas más simples','default'],['claude-haiku-5-5','Haiku 5.5','Más rápido para respuestas rápidas','quick']];
 const EFF=['Bajo','Medio','Alto'],EFI={Bajo:'Responde de forma muy breve y directa.',Medio:'',Alto:'Razona con cuidado y responde con detalle y precisión.'};
 function ai(root){
-  root.innerHTML=`<div class="ai"><div class="ah"><button class="hb" data-a="menu" aria-label="Chats">☰</button><b class="at">Chat nuevo</b><button class="hb" data-a="new" aria-label="Nuevo chat">＋</button></div><div class="am"></div><div class="cmp"><textarea rows="1" placeholder="Chat con Claude" aria-label="Mensaje"></textarea><div class="thumbs"></div><div class="cr"><button class="rb" data-a="att" aria-label="Adjuntar fotos">＋</button><input type="file" accept="image/*" multiple hidden><button class="pill" data-a="mdl"></button><span style="flex:1"></span><button class="rb mic" data-a="mic" aria-label="Dictar"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg></button><button class="rb snd" data-a="send" aria-label="Enviar">↑</button></div></div><div class="drw"><div class="dh"><b>Chats</b><button class="hb" data-a="cl" aria-label="Cerrar">✕</button></div><button class="nw" data-a="new">＋ Chat nuevo</button><div class="cl"></div></div><div class="sheet"></div></div>`;
+  root.innerHTML=`<div class="ai"><div class="ah"><button class="hb" data-a="menu" aria-label="Chats">☰</button><b class="at">Chat nuevo</b><button class="hb" data-a="new" aria-label="Nuevo chat">＋</button></div><div class="am"></div><div class="cmp"><textarea rows="1" placeholder="Pregunta lo que quieras" aria-label="Mensaje"></textarea><div class="thumbs"></div><div class="cr"><button class="rb" data-a="att" aria-label="Adjuntar fotos">＋</button><input type="file" accept="image/*" multiple hidden><button class="pill" data-a="mdl"></button><span style="flex:1"></span><button class="rb mic" data-a="mic" aria-label="Dictar"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg></button><button class="rb snd" data-a="send" aria-label="Enviar">↑</button></div></div><div class="drw"><div class="dh"><b>Chats</b><button class="hb" data-a="cl" aria-label="Cerrar">✕</button></div><button class="nw" data-a="new">＋ Chat nuevo</button><div class="cl"></div></div><div class="sheet"></div></div>`;
   const am=$('.am',root),ta=$('textarea',root),th=$('.thumbs',root),pill=$('.pill',root),sd=$('.snd',root),drw=$('.drw',root),cl=$('.cl',root),sh=$('.sheet',root),fi=$('input[type=file]',root),mic=$('[data-a=mic]',root),title=$('.at',root);
-  let hist=[],curId=null,busy=false,sample=null,ctl=null,pend=[],model='claude-sonnet-5-5',eff='Medio';
+  let hist=[],curId=null,busy=false,sample=null,ctl=null,pend=[],model='gemini-2.5-flash',eff='Medio';
   const cur=()=>S.d.chats.find(c=>c.id===curId);
   const setPill=()=>pill.innerHTML=MODELS.find(m=>m[0]===model)[1]+' <span>'+eff+'</span>';
   const add=(c,t)=>{const d=document.createElement('div');d.className=c;d.textContent=t;am.appendChild(d);am.scrollTop=am.scrollHeight;return d};
@@ -553,7 +553,12 @@ const st=document.createElement('style');st.textContent=`
 .win.max{inset:env(safe-area-inset-top,0px) 0 calc(var(--tbh) + env(safe-area-inset-bottom,0px)) 0!important}
 #menu{bottom:calc(var(--tbh) + 12px + env(safe-area-inset-bottom,0px))}
 .icons{inset:0;display:block;flex-wrap:nowrap;pointer-events:none}
-.icons .ico{position:absolute;pointer-events:auto}`;
+.icons .ico{position:absolute;pointer-events:auto}
+.cam{display:flex;flex-direction:column;height:100%;gap:8px;padding:10px;overflow:auto}.cam video{width:100%;max-height:48%;background:#000;border-radius:12px;object-fit:cover}
+.cbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.cbar button{border:0;border-radius:18px;padding:8px 14px;background:var(--omni);color:var(--ink);cursor:pointer}.cbar button.on{background:var(--acc);color:#fff}.cbar .rec{background:#e5484d;color:#fff;font-weight:700}
+.cgal{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}.cgal>div{background:var(--omni);border-radius:10px;padding:6px;display:flex;flex-direction:column;gap:4px;font-size:11px;word-break:break-all}.cgal img,.cgal video{width:100%;border-radius:8px}.cgal audio{width:100%}.cgal button{border:0;background:none;color:var(--ink);cursor:pointer}
+.ml{display:flex;flex-direction:column;gap:4px}.ml button{display:flex;gap:10px;align-items:center;border:0;background:none;color:var(--ink);text-align:left;padding:6px;border-radius:10px;cursor:pointer}.ml button:hover,.ml button.on{background:var(--omni)}.ml img{width:44px;height:44px;border-radius:6px}.ml small{color:var(--mute);display:block}
+.mp{display:flex;flex-direction:column;gap:6px;padding:8px 10px;border-top:1px solid var(--line);flex:none}.mp audio{width:100%}.mlyr{white-space:pre-wrap;font-size:13px;color:var(--mute);padding:8px}`;
 document.head.appendChild(st);
 
 /* ---- proxy opcional (⚙ en el menú) + caché de búsquedas ---- */
@@ -565,6 +570,7 @@ render=u=>{const r=R0(u);if(r.h.includes('<iframe')){const p=PX(/^https?:/.test(
 const ENG=()=>LS.get('wos:eng','google');
 const LOCAL={'local-gemma':['gemma-2-2b-it-q4f16_1-MLC','gemma-2-2b-it-q4f32_1-MLC']};
 MODELS.push(['local-gemma','Gemma 2 (Google)','Gratis, sin API: corre en tu dispositivo (≈1.5 GB la 1ª vez)','default']);
+MODELS.unshift(['gemini-2.5-flash','Gemini 2.5 Flash','Gratis, de Google','default'],['gemini-2.5-flash-lite','Gemini 2.5 Flash-Lite','Más rápido','quick']);
 let EN=null;
 const say=t=>{const e=[...document.querySelectorAll('.am .a')].pop();if(e&&/^(…|Cargando)/.test(e.textContent))e.textContent=t};
 async function localAI(b,sig){
@@ -584,13 +590,20 @@ async function localAI(b,sig){
   }catch(e){return json({error:{message:String(e&&e.message||e)}},500)}
 }
 const C=new Map(),F=window.fetch.bind(window);
+const fake=m=>new Response(JSON.stringify({organic_results:[{title:'⚠ '+m,link:'',displayed_link:EP(),snippet:'Abre '+EP()+'/?q=hola en una pestaña para ver el error exacto del Worker.'}]}),{headers:{'content-type':'application/json'}});
 window.fetch=(u,o)=>{
   let k=String(u);
-  if(/\/ai$/.test(k)&&o&&o.method==='POST'){let b;try{b=JSON.parse(o.body)}catch{}if(b&&LOCAL[b.model])return localAI(b,o.signal)}
+  if(/\/ai$/.test(k)&&o&&o.method==='POST'){
+    let b;try{b=JSON.parse(o.body)}catch{}
+    if(b&&LOCAL[b.model])return localAI(b,o.signal);
+    const ok=LS.get('wos:ok','');if(ok)o={...o,headers:{...o.headers,'x-owner-key':ok}}}
   if(!/\/(yt)?\?q=/.test(k)||(o&&o.method))return F(u,o);
-  if(/\/\?q=/.test(k))k+='&engine='+ENG();
+  const S1=/\/\?q=/.test(k);if(S1)k+='&engine='+ENG();
   if(C.has(k))return Promise.resolve(new Response(C.get(k),{headers:{'content-type':'application/json'}}));
-  return F(k,o).then(r=>{if(r.ok)r.clone().text().then(t=>{if(!/"error"/.test(t))C.set(k,t)});return r})};
+  return F(k,o).then(async r=>{const t=await r.clone().text();let bad='';
+      try{const e=JSON.parse(t).error;if(e)bad=typeof e==='string'?e:JSON.stringify(e)}catch{bad='Respuesta inválida (HTTP '+r.status+')'}
+      if(bad&&S1)return fake(bad);if(!bad)C.set(k,t);return r})
+    .catch(e=>{if(S1)return fake('Sin conexión con el Worker: '+(e&&e.message||e));throw e})};
 const B0=browser;
 browser=(root,w)=>{B0(root,w);
   const nav=$('.nav',root),s=document.createElement('select'),o=document.createElement('button');
@@ -617,7 +630,8 @@ $('#cfg').onclick=()=>{
   const p=prompt('Dirección de tu proxy (con https://). Si acepta el sitio en el enlace, pon {url} donde va; si no, solo la dirección y escribes el sitio dentro del proxy. Vacío = sin proxy:',LS.get('wos:proxy',''));
   if(p!==null)LS.set('wos:proxy',p.trim());
   const w=prompt('URL de tu Worker (búsqueda e IA):',EP());
-  if(w&&w.trim())LS.set('wos:ddg',w.trim())};
+  if(w&&w.trim())LS.set('wos:ddg',w.trim());
+  const k=prompt('Clave de dueño (la IA usa tu contexto privado solo contigo; vacío = ninguna):',LS.get('wos:ok',''));if(k!==null)LS.set('wos:ok',k.trim())};
 const recs=()=>{const c=(S.d.chats||[]).slice(0,4);rc.innerHTML=c.length?c.map(x=>`<button data-app="ai"><span class="mi">${IC.ai}</span><span>${esc(x.title)}</span></button>`).join(''):'<small style="color:var(--mute);grid-column:1/-1;padding:8px">Tus chats recientes aparecerán aquí.</small>'};
 tog=()=>{M.classList.toggle('show');if(M.classList.contains('show')){$('#lq').value='';tiles();recs();$('#lq').focus()}};
 document.addEventListener('pointerdown',e=>{if(M.classList.contains('show')&&!e.target.closest('#menu,#start'))M.classList.remove('show')},true);
@@ -691,21 +705,92 @@ const full=(yb,u,nm)=>{
 const SITES={
 ig:{n:'Instagram',c:'#d62976',home:'https://www.instagram.com',re:/instagram\.com\/(?:[\w.]+\/)?(p|reel|tv)\/([\w-]+)/,e:m=>`https://www.instagram.com/${m[1]}/${m[2]}/embed`,h:'Pega el enlace de una publicación o reel de Instagram.'},
 tt:{n:'TikTok',c:'#fe2c55',home:'https://www.tiktok.com',re:/tiktok\.com\/.*?video\/(\d+)/,e:m=>`https://www.tiktok.com/embed/v2/${m[1]}`,h:'Pega el enlace largo de un video de TikTok (con /video/…).'}};
-const O0=openApp;
+const O0=openApp;let skipYT=false;
 openApp=a=>{
+  const X=XAPPS[a];
+  if(X){skipYT=true;O0('yt');skipYT=false;const o=wins['w'+n],nm='<span class="mi">'+IC[a]+'</span> '+X.n,root=$('.body',o.w);$('.title b',o.w).innerHTML=nm;o.tb.innerHTML=nm;root.innerHTML='';X.f(root,o.w);return}
   const c=SITES[a];if(!c)return O0(a);
-  O0('yt');const o=wins['w'+n],nm='<span class="mi">'+IC[a]+'</span> '+c.n,root=$('.body',o.w);
+  skipYT=true;O0('yt');skipYT=false;const o=wins['w'+n],nm='<span class="mi">'+IC[a]+'</span> '+c.n,root=$('.body',o.w);
   $('.title b',o.w).innerHTML=nm;o.tb.innerHTML=nm;
   root.innerHTML=`<div class="yt"><div class="yh"><input placeholder="Enlace de ${c.n}" aria-label="Enlace"><button style="background:${c.c}">Ver</button><button style="background:#555">Completo</button></div><div class="yb"><div class="ym">${c.h}</div></div></div>`;
   const i=$('input',root),yb=$('.yb',root),[v,f]=root.querySelectorAll('.yh button');
   const go=()=>{const m=i.value.match(c.re);yb.innerHTML=m?`<iframe src="${c.e(m)}" ${FR}></iframe>`:'<div class="ym">Ese enlace no es válido.</div>'};
   v.onclick=go;i.onkeydown=e=>{if(e.key==='Enter')go()};f.onclick=()=>full(yb,c.home,c.n)};
 const Y0=youtube;
-youtube=root=>{Y0(root);const b=document.createElement('button');b.textContent='Completo';b.style.background='#555';b.onclick=()=>full($('.yb',root),'https://m.youtube.com','YouTube');$('.yh',root).appendChild(b)};
+youtube=root=>{if(skipYT)return;Y0(root);
+  const b=document.createElement('button');b.textContent='Completo';b.style.background='#555';b.onclick=()=>full($('.yb',root),'https://m.youtube.com','YouTube');$('.yh',root).appendChild(b);
+  const yb=$('.yb',root),inp=$('input',root),bt=$('button',root),dec=s=>{const t=document.createElement('textarea');t.innerHTML=s;return t.value};
+  fetch(EP()+'/yt?chart=1').then(r=>r.json()).then(j=>{if(!j.items||!j.items.length||yb.querySelector('.yg')||yb.querySelector('iframe'))return;
+    yb.innerHTML='<div class="yg"></div>';const g=$('.yg',yb);
+    j.items.forEach(it=>{const c=document.createElement('button');c.className='yc';const im=new Image(),t=document.createElement('b'),s=document.createElement('small');im.src=it.thumb;im.alt='';t.textContent=dec(it.title);s.textContent=dec(it.channel);c.append(im,t,s);c.onclick=()=>{inp.value=it.id;bt.click()};g.appendChild(c)})}).catch(()=>{})};
+
+/* ---- Apps nuevas: Cámara y Música ---- */
+const MEM=[];
+const idb=()=>new Promise((ok,no)=>{const q=indexedDB.open('wos-media',1);q.onupgradeneeded=()=>q.result.createObjectStore('m',{keyPath:'id'});q.onsuccess=()=>ok(q.result);q.onerror=()=>no(q.error)});
+const tx=async(mode,f)=>{const d=await idb();return new Promise((ok,no)=>{const t=d.transaction('m',mode),r=f(t.objectStore('m'));t.oncomplete=()=>ok(r&&r.result);t.onerror=()=>no(t.error)})};
+const mList=async()=>(S.user?((await tx('readonly',s=>s.getAll()))||[]).filter(x=>x.user===S.user):MEM).slice().sort((a,b)=>b.ts-a.ts);
+const mSave=m=>S.user?tx('readwrite',s=>s.put(m)):MEM.push(m);
+const mDel=id=>S.user?tx('readwrite',s=>s.delete(id)):MEM.splice(MEM.findIndex(x=>x.id===id),1);
+
+function camera(root){
+  root.innerHTML='<div class="cam"><video playsinline muted></video><div class="cbar"><button data-m="photo" class="on">📷 Foto</button><button data-m="video">🎥 Video</button><button data-m="audio">🎙 Audio</button><label><input type="checkbox" checked> Descargar</label><button class="rec">●</button></div><div class="ym" hidden></div><div class="cgal"></div></div>';
+  const v=$('video',root),gal=$('.cgal',root),dl=$('input',root),rb=$('.rec',root),msg=$('.ym',root),mb=[...root.querySelectorAll('[data-m]')];
+  let mode='photo',st=null,rec=null,urls=[];
+  const stop=()=>{if(st)st.getTracks().forEach(t=>t.stop());st=null;v.srcObject=null};
+  const start=async()=>{stop();msg.hidden=true;
+    try{st=await navigator.mediaDevices.getUserMedia(mode==='audio'?{audio:true}:{video:{facingMode:'user'},audio:mode==='video'});v.style.display=mode==='audio'?'none':'';v.srcObject=st;v.play().catch(()=>{})}
+    catch(e){msg.hidden=false;msg.textContent='Sin permiso o sin '+(mode==='audio'?'micrófono':'cámara')+'. Permítelo en el candado de la barra del navegador.'}};
+  const dlf=m=>{const a=document.createElement('a');a.href=URL.createObjectURL(m.blob);a.download=m.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),6e3)};
+  const draw=async()=>{urls.forEach(u=>URL.revokeObjectURL(u));urls=[];gal.innerHTML='';
+    for(const m of await mList()){const u=URL.createObjectURL(m.blob);urls.push(u);const d=document.createElement('div');
+      d.innerHTML=(m.type==='photo'?`<img src="${u}">`:m.type==='video'?`<video src="${u}" controls playsinline></video>`:`<audio src="${u}" controls></audio>`)+`<span>${esc(m.name)}</span><span><button data-d aria-label="Descargar">⬇</button><button data-x aria-label="Borrar">✕</button></span>`;
+      d.querySelector('[data-d]').onclick=()=>dlf(m);d.querySelector('[data-x]').onclick=async()=>{await mDel(m.id);draw()};gal.appendChild(d)}};
+  const save=async(blob,type)=>{const d=new Date(),p=n=>String(n).padStart(2,'0'),t=blob.type||'',
+      ext=type==='photo'?'jpg':/mp4/.test(t)?(type==='audio'?'m4a':'mp4'):/ogg/.test(t)?'ogg':'webm',
+      m={id:Date.now()+'-'+Math.random().toString(36).slice(2,6),user:S.user||'_g',type,blob,ts:+d,
+        name:({photo:'foto',video:'video',audio:'audio'})[type]+'-'+d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+'-'+p(d.getHours())+p(d.getMinutes())+p(d.getSeconds())+'.'+ext};
+    await mSave(m);if(dl.checked)dlf(m);draw()};
+  rb.onclick=()=>{
+    if(!st)return start();
+    if(mode==='photo'){const c=document.createElement('canvas');c.width=v.videoWidth;c.height=v.videoHeight;c.getContext('2d').drawImage(v,0,0);c.toBlob(b=>b&&save(b,'photo'),'image/jpeg',.92);return}
+    if(rec){rec.stop();return}
+    const ch=[],md=mode;rec=new MediaRecorder(st);rec.ondataavailable=e=>e.data.size&&ch.push(e.data);
+    rec.onstop=()=>{const t=rec.mimeType;rec=null;rb.textContent='●';save(new Blob(ch,{type:t}),md)};rec.start();rb.textContent='■'};
+  mb.forEach(b=>b.onclick=()=>{if(rec)rec.stop();mode=b.dataset.m;mb.forEach(x=>x.classList.toggle('on',x===b));start()});
+  const iv=setInterval(()=>{if(!root.isConnected){stop();clearInterval(iv);urls.forEach(u=>URL.revokeObjectURL(u))}},1000);
+  start();draw();
+}
+
+function music(root){
+  root.innerHTML='<div class="yt"><div class="yh"><input placeholder="Buscar canciones o artistas…" aria-label="Buscar música"><button style="background:#fa243c">Buscar</button></div><div class="yb"><div class="ml"><div class="ym">Busca una canción. Vista previa de 30 s; “Completa” usa YouTube.</div></div><div class="mlyr"></div></div><div class="mp"><b class="mt">—</b><audio controls playsinline></audio><div><button class="ybk" data-f>▶ Completa</button> <button class="ybk" data-l>Letra</button></div><div class="mfr"></div></div></div>';
+  const inp=$('input',root),ml=$('.ml',root),au=$('audio',root),mt=$('.mt',root),ly=$('.mlyr',root),fr=$('.mfr',root);
+  let L=[],cur=-1;
+  const jp=u=>new Promise((ok,no)=>{const cb='j'+Date.now()+Math.random().toString(36).slice(2,6),s=document.createElement('script');window[cb]=d=>{ok(d);s.remove();delete window[cb]};s.onerror=()=>{s.remove();no(new Error('x'))};s.src=u+'&callback='+cb;document.head.appendChild(s)});
+  const play=i=>{const s=L[i];if(!s)return;cur=i;fr.innerHTML='';ly.textContent='';au.src=s.previewUrl;au.play().catch(()=>{});mt.textContent=s.trackName+' — '+s.artistName;[...ml.children].forEach((b,j)=>b.classList.toggle('on',j===i))};
+  au.onended=()=>play(cur+1);
+  const go=async()=>{const q=inp.value.trim();if(!q)return;ml.innerHTML='<div class="ym">Buscando…</div>';
+    try{const d=await jp('https://itunes.apple.com/search?media=music&entity=song&limit=30&term='+encodeURIComponent(q));L=(d.results||[]).filter(x=>x.previewUrl);ml.innerHTML='';
+      L.forEach((s,i)=>{const b=document.createElement('button'),im=new Image(),t=document.createElement('span'),a=document.createElement('small');im.src=s.artworkUrl100;im.alt='';t.textContent=s.trackName;a.textContent=s.artistName;t.appendChild(a);b.append(im,t);b.onclick=()=>play(i);ml.appendChild(b)});
+      if(!L.length)ml.innerHTML='<div class="ym">Sin resultados.</div>'}
+    catch{ml.innerHTML='<div class="ym">No se pudo buscar. Revisa tu conexión.</div>'}};
+  $('.yh button',root).onclick=go;inp.onkeydown=e=>{if(e.key==='Enter')go()};
+  $('[data-f]',root).onclick=async()=>{const s=L[cur];if(!s)return;au.pause();fr.textContent='Buscando en YouTube…';
+    try{const j=await(await fetch(EP()+'/yt?q='+encodeURIComponent(s.artistName+' '+s.trackName+' audio'))).json(),v=(j.items||[])[0];if(!v)throw 0;
+      fr.innerHTML='<iframe src="https://www.youtube-nocookie.com/embed/'+v.id+'?autoplay=1&rel=0" allow="autoplay;encrypted-media" allowfullscreen style="width:100%;height:210px;border:0;border-radius:10px"></iframe>'}
+    catch{fr.textContent='No se pudo cargar la versión completa.'}};
+  $('[data-l]',root).onclick=async()=>{const s=L[cur];if(!s)return;ly.textContent='Buscando letra…';
+    try{const d=await(await fetch('https://lrclib.net/api/get?artist_name='+encodeURIComponent(s.artistName)+'&track_name='+encodeURIComponent(s.trackName))).json();ly.textContent=d.plainLyrics||'Sin letra.'}catch{ly.textContent='Sin letra.'}};
+}
+Object.assign(IC,{
+cam:'<svg viewBox="0 0 48 48"><rect width="48" height="48" rx="11" fill="#3a3f47"/><rect x="18" y="11" width="12" height="6" rx="2" fill="#e8eaed"/><rect x="9" y="15" width="30" height="21" rx="5" fill="#e8eaed"/><circle cx="24" cy="25.5" r="6.5" fill="#3a3f47"/><circle cx="24" cy="25.5" r="3.5" fill="#6aa9ff"/></svg>',
+mus:'<svg viewBox="0 0 48 48"><rect width="48" height="48" rx="11" fill="#fa243c"/><path d="M19 32V15l15-3v17" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="32" r="4" fill="#fff"/><circle cx="31" cy="29" r="4" fill="#fff"/></svg>'});
+Object.assign(APPS,{cam:'Cámara',mus:'Música'});
+const XAPPS={cam:{n:'Cámara',f:camera},mus:{n:'Música',f:music}};
 
 /* ---- apps nuevas por defecto en barra y escritorio (una vez por usuario) ---- */
 const L0=loadU;
 loadU=u=>{L0(u);if(!u){S.d.chats=[];save()}if(!S.d.v3){S.d.v3=1;['pins','desk'].forEach(k=>S.d[k].push('ig','tt'));save();rend()}
+  if(!S.d.v5){S.d.v5=1;['pins','desk'].forEach(k=>S.d[k].push('cam','mus'));save();rend()}
   if(!S.d.v4){S.d.v4=1;['pins','desk'].forEach(k=>{if(!S.d[k].includes('yt'))S.d[k].push('yt')});save();rend()}};
 loadU(S.user);
 })();
