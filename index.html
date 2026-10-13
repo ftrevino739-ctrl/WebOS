@@ -542,11 +542,15 @@ const st=document.createElement('style');st.textContent=`
 #menu .lf{margin:auto -28px 0;padding:10px 28px;background:rgba(128,128,128,.14);justify-content:space-between;gap:6px}
 #menu .lf button{border:0;background:none;padding:6px 8px;border-radius:8px}
 .ghost{position:fixed;width:56px;height:56px;border-radius:14px;overflow:hidden;pointer-events:none;z-index:400000;opacity:.9;box-shadow:0 8px 24px rgba(0,0,0,.5)}.ghost>*{width:100%;height:100%;display:block}
-#task.dt{box-shadow:inset 0 0 0 2px #4a9dff}`;
+#task.dt{box-shadow:inset 0 0 0 2px #4a9dff}
+.icons{bottom:calc(62px + env(safe-area-inset-bottom,0px));flex-wrap:wrap;align-content:flex-start;column-gap:6px}
+#pins button,.icons .ico{touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+@media(hover:none){#menu .pb{display:flex;flex-wrap:wrap;justify-content:center}}`;
 document.head.appendChild(st);
 
 /* ---- proxy opcional (⚙ en el menú) + caché de búsquedas ---- */
-const PX=u=>{const p=LS.get('wos:proxy','');return p?p.replace('{url}',encodeURIComponent(u)).replace('{raw}',u):''};
+const PT=()=>(LS.get('wos:proxy','')||'').trim();
+const PX=u=>{const p=PT();return /^https?:\/\//i.test(p)&&/\{(url|raw)\}/.test(p)?p.replace('{url}',encodeURIComponent(u)).replace('{raw}',u):''};
 const R0=render;
 render=u=>{const r=R0(u);if(r.h.includes('<iframe')){const p=PX(/^https?:/.test(u)?u:'https://'+u);if(p)r.h=r.h.replace(/(<iframe src=")[^"]*"/,(_,a)=>a+esc(p)+'"')}return r};
 const C=new Map(),F=window.fetch.bind(window);
@@ -567,7 +571,7 @@ M.insertBefore(h1,ap);ap.after(h2,rc);
 $('.lf',M).insertAdjacentHTML('beforeend','<button id="cfg" aria-label="Ajustes">⚙</button><button id="fsb" aria-label="Pantalla completa">⛶</button>');
 $('#fsb').onclick=fs;
 $('#cfg').onclick=()=>{
-  const p=prompt('Proxy para el navegador, con {url} donde va la dirección (vacío = sin proxy):',LS.get('wos:proxy',''));
+  const p=prompt('Dirección de tu proxy (con https://). Si acepta el sitio en el enlace, pon {url} donde va; si no, solo la dirección y escribes el sitio dentro del proxy. Vacío = sin proxy:',LS.get('wos:proxy',''));
   if(p!==null)LS.set('wos:proxy',p.trim());
   const w=prompt('URL de tu Worker (búsqueda e IA):',EP());
   if(w&&w.trim())LS.set('wos:ddg',w.trim())};
@@ -578,25 +582,35 @@ const T0=tiles;tiles=()=>{T0();document.querySelectorAll('#apps [draggable]').fo
 $('#lq').oninput=tiles;
 document.addEventListener('dragstart',e=>{e.preventDefault();e.stopPropagation()},true);
 
-/* ---- Arrastrar apps (ratón o dedo) a barra de tareas o escritorio ---- */
+/* ---- Arrastrar apps (ratón o dedo): menú, escritorio y barra, en cualquier dirección ---- */
 let dg=null,blk=false;
-addEventListener('pointerdown',e=>{const t=e.target.closest('#apps .tl');if(t)dg={a:t.dataset.d,x:e.clientX,y:e.clientY,on:false,g:null}});
+addEventListener('pointerdown',e=>{
+  if(e.button>0||e.target.closest('.pb'))return;
+  const t=e.target.closest('#apps .tl,#pins [data-app],.icons [data-app]');if(!t)return;
+  try{e.target.releasePointerCapture(e.pointerId)}catch{}
+  dg={a:t.dataset.d||t.dataset.app,x:e.clientX,y:e.clientY,on:false,g:null}});
 addEventListener('pointermove',e=>{
   if(!dg)return;
   if(!dg.on){if(Math.hypot(e.clientX-dg.x,e.clientY-dg.y)<8)return;
     dg.on=true;dg.g=document.createElement('div');dg.g.className='ghost';dg.g.innerHTML=IC[dg.a];document.body.appendChild(dg.g);M.classList.add('drag')}
   dg.g.style.left=e.clientX-28+'px';dg.g.style.top=e.clientY-28+'px';
   const el=document.elementFromPoint(e.clientX,e.clientY);$('#task').classList.toggle('dt',!!(el&&el.closest('#task')))});
-const endDrag=(e,drop)=>{
+const endDrag=(e,ok)=>{
   if(!dg)return;const d=dg;dg=null;if(!d.on)return;
   d.g.remove();M.classList.remove('drag');$('#task').classList.remove('dt');blk=true;setTimeout(()=>blk=false,60);
-  if(!drop)return;
-  const el=document.elementFromPoint(e.clientX,e.clientY),k=el&&el.closest('#task')?'pins':'desk';
-  if(!S.d[k].includes(d.a)){S.d[k].push(d.a);save();rend()}};
+  if(!ok)return;
+  const el=document.elementFromPoint(e.clientX,e.clientY),tk=!!(el&&el.closest('#task')),k=tk?'pins':'desk',L=S.d[k],
+    bs=[...document.querySelectorAll(tk?'#pins [data-app]':'.icons [data-app]')],from=L.indexOf(d.a);
+  let at=L.length;
+  if(tk||(el&&el.closest('.icons'))){
+    for(let j=0;j<bs.length;j++){const r=bs[j].getBoundingClientRect();if(tk?e.clientX<r.left+r.width/2:e.clientY<r.top+r.height/2){at=j;break}}
+  }else if(from>-1)return;
+  if(from>-1){L.splice(from,1);if(from<at)at--}
+  L.splice(at,0,d.a);save();rend()};
 addEventListener('pointerup',e=>endDrag(e,true));addEventListener('pointercancel',e=>endDrag(e,false));
 document.addEventListener('click',e=>{if(blk){e.stopPropagation();e.preventDefault()}},true);
-/* clic derecho / pulsación larga sobre un icono de barra o escritorio = quitarlo */
-document.addEventListener('contextmenu',e=>{const b=e.target.closest('#pins [data-app],.icons [data-app]');if(!b)return;e.preventDefault();
+/* clic derecho sobre un icono de barra o escritorio = quitarlo (en táctil, usa los botones Barra/Inicio del menú) */
+document.addEventListener('contextmenu',e=>{const b=e.target.closest('#pins [data-app],.icons [data-app]');if(!b||!matchMedia('(hover:hover)').matches)return;e.preventDefault();
   if(!confirm('¿Quitar '+APPS[b.dataset.app]+'?'))return;const k=b.closest('#pins')?'pins':'desk';S.d[k]=S.d[k].filter(a=>a!==b.dataset.app);save();rend()});
 
 /* ---- YouTube / Instagram / TikTok ---- */
@@ -605,7 +619,14 @@ ig:'<svg viewBox="0 0 48 48"><defs><linearGradient id="igg" x1="0" y1="1" x2="1"
 tt:'<svg viewBox="0 0 48 48"><rect width="48" height="48" rx="11" fill="#000"/><g fill="none" stroke-width="3.5" stroke-linecap="round"><path d="M25 12v17a5 5 0 1 1-5-5M25 12c.5 4 3 6.5 7 7" stroke="#25f4ee" transform="translate(-1.5 -1)"/><path d="M25 12v17a5 5 0 1 1-5-5M25 12c.5 4 3 6.5 7 7" stroke="#fe2c55" transform="translate(1.5 1)"/><path d="M25 12v17a5 5 0 1 1-5-5M25 12c.5 4 3 6.5 7 7" stroke="#fff"/></g></svg>'});
 Object.assign(APPS,{ig:'Instagram',tt:'TikTok'});
 const FR='style="width:100%;height:70vh;border:0;border-radius:12px;background:#fff" allow="autoplay;fullscreen;encrypted-media" allowfullscreen';
-const full=(yb,u)=>{const p=PX(u);if(!p)return window.open(u,'_blank');yb.innerHTML=`<iframe src="${esc(p)}" ${FR}></iframe>`};
+const full=(yb,u,nm)=>{
+  const t=PT(),ok=/^https?:\/\//i.test(t),cfg=()=>$('#cfg').click();
+  if(!ok){
+    yb.innerHTML=`<div class="ym">${t?'La dirección del proxy debe empezar con https:// (ahora dice: '+esc(t)+').':'Para ver '+esc(nm)+' completo aquí hace falta un proxy.'}<br><br><button class="ybk" data-c>⚙ Configurar proxy</button> <button class="ybk" data-o>Abrir en pestaña nueva</button></div>`;
+    yb.querySelector('[data-c]').onclick=cfg;yb.querySelector('[data-o]').onclick=()=>window.open(u,'_blank');return}
+  const s=PX(u)||t;
+  yb.innerHTML=`<div class="ym" style="padding:4px 2px 8px;font-size:12px;text-align:left;word-break:break-all">Cargando por proxy: ${esc(s)}<br><button class="ybk" data-o>Abrir en pestaña</button> <button class="ybk" data-c>⚙ Proxy</button></div><iframe src="${esc(s)}" ${FR}></iframe>`;
+  yb.querySelector('[data-o]').onclick=()=>window.open(s,'_blank');yb.querySelector('[data-c]').onclick=cfg};
 const SITES={
 ig:{n:'Instagram',c:'#d62976',home:'https://www.instagram.com',re:/instagram\.com\/(?:[\w.]+\/)?(p|reel|tv)\/([\w-]+)/,e:m=>`https://www.instagram.com/${m[1]}/${m[2]}/embed`,h:'Pega el enlace de una publicación o reel de Instagram.'},
 tt:{n:'TikTok',c:'#fe2c55',home:'https://www.tiktok.com',re:/tiktok\.com\/.*?video\/(\d+)/,e:m=>`https://www.tiktok.com/embed/v2/${m[1]}`,h:'Pega el enlace largo de un video de TikTok (con /video/…).'}};
@@ -617,13 +638,14 @@ openApp=a=>{
   root.innerHTML=`<div class="yt"><div class="yh"><input placeholder="Enlace de ${c.n}" aria-label="Enlace"><button style="background:${c.c}">Ver</button><button style="background:#555">Completo</button></div><div class="yb"><div class="ym">${c.h}</div></div></div>`;
   const i=$('input',root),yb=$('.yb',root),[v,f]=root.querySelectorAll('.yh button');
   const go=()=>{const m=i.value.match(c.re);yb.innerHTML=m?`<iframe src="${c.e(m)}" ${FR}></iframe>`:'<div class="ym">Ese enlace no es válido.</div>'};
-  v.onclick=go;i.onkeydown=e=>{if(e.key==='Enter')go()};f.onclick=()=>full(yb,c.home)};
+  v.onclick=go;i.onkeydown=e=>{if(e.key==='Enter')go()};f.onclick=()=>full(yb,c.home,c.n)};
 const Y0=youtube;
-youtube=root=>{Y0(root);const b=document.createElement('button');b.textContent='Completo';b.style.background='#555';b.onclick=()=>full($('.yb',root),'https://m.youtube.com');$('.yh',root).appendChild(b)};
+youtube=root=>{Y0(root);const b=document.createElement('button');b.textContent='Completo';b.style.background='#555';b.onclick=()=>full($('.yb',root),'https://m.youtube.com','YouTube');$('.yh',root).appendChild(b)};
 
 /* ---- apps nuevas por defecto en barra y escritorio (una vez por usuario) ---- */
 const L0=loadU;
-loadU=u=>{L0(u);if(!S.d.v3){S.d.v3=1;['pins','desk'].forEach(k=>S.d[k].push('ig','tt'));save();rend()}};
+loadU=u=>{L0(u);if(!S.d.v3){S.d.v3=1;['pins','desk'].forEach(k=>S.d[k].push('ig','tt'));save();rend()}
+  if(!S.d.v4){S.d.v4=1;['pins','desk'].forEach(k=>{if(!S.d[k].includes('yt'))S.d[k].push('yt')});save();rend()}};
 loadU(S.user);
 })();
 
