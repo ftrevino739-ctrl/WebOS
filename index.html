@@ -248,6 +248,8 @@ h1{font-weight:500;margin:0 0 8px}
   <div id="clock"></div><button id="prof" aria-label="Perfil"></button>
 </div>
 
+<script src="/scram/scramjet.all.js"></script>
+<script src="/baremux/index.js"></script>
 <script>
 const $=(s,r=document)=>r.querySelector(s);
 const desk=$('#desk'),tbs=$('#tbs');
@@ -630,8 +632,8 @@ function ai(root){
     if(real)return real(input,o);
     const msgs=input.map(m=>({role:m.role,content:m.content}));
     // Gemini (Google AI) — free tier
-    if(/^gemini/i.test(o.model||'')){
-      const GKEY='AQ.Ab8RN6JN7qiRZjQqdC02uDsodZ-yZBwopVcAw-1LpyRTd5_f3g';
+    const GKEY=LS.get('wos:gk','');
+    if(GKEY&&/^gemini/i.test(o.model||'')){
       const model=(o.model||'gemini-2.0-flash').replace(/^gemini-2\.5-flash-lite$/,'gemini-2.0-flash-lite').replace(/^gemini-2\.5-flash$/,'gemini-2.0-flash');
       const contents=[];
       for(const m of msgs){
@@ -755,7 +757,8 @@ const st=document.createElement('style');st.textContent=`
 .cbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.cbar button{border:0;border-radius:18px;padding:8px 14px;background:var(--omni);color:var(--ink);cursor:pointer}.cbar button.on{background:var(--acc);color:#fff}.cbar .rec{background:#e5484d;color:#fff;font-weight:700}
 .cgal{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}.cgal>div{background:var(--omni);border-radius:10px;padding:6px;display:flex;flex-direction:column;gap:4px;font-size:11px;word-break:break-all}.cgal img,.cgal video{width:100%;border-radius:8px}.cgal audio{width:100%}.cgal button{border:0;background:none;color:var(--ink);cursor:pointer}
 .ml{display:flex;flex-direction:column;gap:4px}.ml button{display:flex;gap:10px;align-items:center;border:0;background:none;color:var(--ink);text-align:left;padding:6px;border-radius:10px;cursor:pointer}.ml button:hover,.ml button.on{background:var(--omni)}.ml img{width:44px;height:44px;border-radius:6px}.ml small{color:var(--mute);display:block}
-.mp{display:flex;flex-direction:column;gap:6px;padding:8px 10px;border-top:1px solid var(--line);flex:none}.mp audio{width:100%}.mlyr{white-space:pre-wrap;font-size:13px;color:var(--mute);padding:8px}`;
+.mp{display:flex;flex-direction:column;gap:6px;padding:8px 10px;border-top:1px solid var(--line);flex:none}.mp audio{width:100%}.mlyr{white-space:pre-wrap;font-size:13px;color:var(--mute);padding:8px}
+.sjt{position:absolute;inset:0;overflow:auto}`;
 document.head.appendChild(st);
 
 /* ---- proxy opcional (<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-3px"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg> en el menú) + caché de búsquedas ---- */
@@ -770,6 +773,7 @@ const LOCAL={'local-gemma':['gemma-2-2b-it-q4f16_1-MLC','gemma-2-2b-it-q4f32_1-M
 let EN=null;
 const say=t=>{const e=[...document.querySelectorAll('.am .a')].pop();if(e&&/^(…|Cargando)/.test(e.textContent))e.textContent=t};
 async function localAI(b,sig){
+  if(b.model==='local-nano')return nano(b);
   const json=(o,s=200)=>new Response(JSON.stringify(o),{status:s,headers:{'content-type':'application/json'}});
   if(!navigator.gpu)return json({error:{message:'Este navegador no tiene WebGPU, así que no puede correr Gemma aquí.'}},500);
   try{
@@ -792,18 +796,6 @@ window.fetch=(u,o)=>{
   if(/\/ai$/.test(k)&&o&&o.method==='POST'){
     let b;try{b=JSON.parse(o.body)}catch{}
     if(b&&LOCAL[b.model])return localAI(b,o.signal);
-    if(b&&/^gemini/i.test(b.model||'')){
-      const GKEY='AQ.Ab8RN6JN7qiRZjQqdC02uDsodZ-yZBwopVcAw-1LpyRTd5_f3g';
-      return (async()=>{
-        const contents=(b.messages||[]).map(m=>({role:m.role==='assistant'?'model':'user',parts:[{text:typeof m.content==='string'?m.content:JSON.stringify(m.content)}]}));
-        const url='https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(b.model)+':generateContent?key='+encodeURIComponent(GKEY);
-        const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents}),signal:o.signal});
-        const j=await r.json();
-        if(!r.ok||j.error)return new Response(JSON.stringify({error:j.error||{message:'Gemini error'}}),{status:r.status||500,headers:{'content-type':'application/json'}});
-        const text=((j.candidates||[])[0]&&(j.candidates[0].content||{}).parts||[]).map(x=>x.text||'').join('')||'';
-        return new Response(JSON.stringify({content:[{type:'text',text}]}),{headers:{'content-type':'application/json'}});
-      })();
-    }
     const ok=LS.get('wos:ok','');if(ok)o={...o,headers:{...o.headers,'x-owner-key':ok}}}
   if(!/\/(yt)?\?q=/.test(k)||(o&&o.method))return F(u,o);
   const S1=/\/\?q=/.test(k);if(S1)k+='&engine='+ENG();
@@ -898,6 +890,7 @@ tt:'<svg viewBox="0 0 48 48"><rect width="48" height="48" rx="11" fill="#000"/><
 Object.assign(APPS,{ig:'Instagram',tt:'TikTok'});
 const FR='style="width:100%;height:70vh;border:0;border-radius:12px;background:#fff" allow="autoplay;fullscreen;encrypted-media" allowfullscreen';
 const full=(yb,u,nm)=>{
+  if(SJ()){sjLoad(yb,u);return}
   const t=PT(),ok=/^https?:\/\//i.test(t),cfg=()=>alert('Configuración no disponible');
   if(!ok){
     yb.innerHTML=`<div class="ym">${t?'La dirección del proxy debe empezar con https:// (ahora dice: '+esc(t)+').':'Para ver '+esc(nm)+' completo aquí hace falta un proxy.'}<br><br><button class="ybk" data-c><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg> Configurar proxy</button> <button class="ybk" data-o>Abrir en pestaña nueva</button></div>`;
@@ -999,9 +992,105 @@ mus:'<svg viewBox="0 0 48 48"><rect width="48" height="48" rx="11" fill="#fa243c
 Object.assign(APPS,{cam:'Cámara',mus:'Música'});
 const XAPPS={cam:{n:'Cámara',f:camera},mus:{n:'Música',f:music}};
 
+/* ---- Navegador real con Scramjet (solo si el servidor Node está detrás) ---- */
+const SJ=()=>typeof $scramjetLoadController==='function'&&typeof BareMux!=='undefined';
+let SJP=null,SJC=null;
+function sjInit(){
+  if(SJP)return SJP;
+  SJP=(async()=>{
+    if(!navigator.serviceWorker)throw new Error('Este navegador no permite service workers (hace falta https).');
+    const {ScramjetController}=$scramjetLoadController();
+    SJC=new ScramjetController({files:{wasm:'/scram/scramjet.wasm.wasm',all:'/scram/scramjet.all.js',sync:'/scram/scramjet.sync.js'}});
+    SJC.init();
+    await navigator.serviceWorker.register('/sw.js');await navigator.serviceWorker.ready;
+    const c=new BareMux.BareMuxConnection('/baremux/worker.js'),wisp=(location.protocol==='https:'?'wss':'ws')+'://'+location.host+'/wisp/';
+    if((await c.getTransport())!=='/libcurl/index.mjs')await c.setTransport('/libcurl/index.mjs',[{websocket:wisp}]);
+    return SJC;
+  })();
+  SJP.catch(()=>{SJP=null});
+  return SJP;
+}
+const sjStyle='position:absolute;inset:0;width:100%;height:100%;border:0;background:#fff';
+async function sjLoad(box,url){
+  box.innerHTML='<div class="ym">Cargando por proxy…</div>';
+  try{await sjInit();const f=SJC.createFrame();f.frame.style.cssText='width:100%;height:70vh;border:0;border-radius:12px;background:#fff';box.innerHTML='';box.appendChild(f.frame);f.go(url);return f}
+  catch(e){box.innerHTML='<div class="ym">No se pudo iniciar el proxy: '+esc(String(e&&e.message||e))+'</div>';return null}
+}
+function sjBrowser(root){
+  root.innerHTML='<div class="tabs"></div><div class="nav"><button aria-label="Atrás">←</button><button aria-label="Adelante">→</button><button aria-label="Recargar">⟳</button><input class="omni" placeholder="Busca en Google o escribe una dirección" aria-label="Barra de direcciones"><select aria-label="Buscador"></select></div><div class="page"></div>';
+  const tabsEl=$('.tabs',root),om=$('.omni',root),page=$('.page',root),[bk,fw,rl]=root.querySelectorAll('.nav>button'),sel=$('select',root);
+  sel.style.cssText='height:30px;border-radius:15px;border:1px solid var(--line);background:var(--omni);color:var(--ink);padding:0 6px;font-size:12px;flex:none';
+  sel.innerHTML=[['google','Google'],['bing','Bing'],['duckduckgo','DuckDuckGo']].map(x=>`<option value="${x[0]}">${x[1]}</option>`).join('');
+  sel.value=ENG();sel.onchange=()=>LS.set('wos:eng',sel.value);
+  const ENGS={google:'https://www.google.com/search?q=',bing:'https://www.bing.com/search?q=',duckduckgo:'https://duckduckgo.com/?q='};
+  let tabs=[],cur=0,sig='';
+  const T=()=>tabs[cur];
+  const norm=v=>{v=v.trim();if(!v)return'';
+    try{const u=new URL(v);if(/^https?:$/.test(u.protocol))return u.toString()}catch{}
+    if(!/\s/.test(v)){try{const u=new URL('https://'+v);if(u.hostname.includes('.'))return u.toString()}catch{}}
+    return ENGS[ENG()]+encodeURIComponent(v)};
+  const home=t=>{
+    t.box.innerHTML='<div class="center"><div class="logo"><span>W</span><span>e</span><span>b</span><span>O</span><span>S</span></div><input class="sb" placeholder="Busca o escribe una dirección" aria-label="Buscar"><div class="tiles">'+
+      [['Google','https://www.google.com','#4285f4'],['YouTube','https://www.youtube.com','#ff0033'],['Instagram','https://www.instagram.com','#d62976'],['TikTok','https://www.tiktok.com','#111'],['Wikipedia','https://es.wikipedia.org','#666']]
+      .map(x=>`<button class="tile" data-u="${x[1]}"><i style="background:${x[2]};color:#fff">${x[0][0]}</i>${x[0]}</button>`).join('')+'</div></div>';
+    const sb=$('.sb',t.box);sb.onkeydown=e=>{if(e.key==='Enter')go(sb.value)};
+    t.box.querySelectorAll('.tile').forEach(b=>b.onclick=()=>go(b.dataset.u))};
+  async function go(v){
+    const u=norm(v);if(!u)return;const t=T();
+    try{
+      if(!t.fr){t.box.innerHTML='<div class="ld">Cargando…</div>';await sjInit();
+        const f=SJC.createFrame();f.frame.style.cssText=sjStyle;t.box.innerHTML='';t.box.appendChild(f.frame);t.fr=f}
+      t.url=u;t.title=u.replace(/^https?:\/\//,'').slice(0,30);t.fr.go(u);bar()}
+    catch(e){t.box.innerHTML='<div class="ym">No se pudo iniciar el proxy: '+esc(String(e&&e.message||e))+'</div>'}}
+  function bar(force){
+    const s=tabs.map(t=>t.title).join('|')+'#'+cur;
+    if(force||s!==sig){sig=s;tabsEl.innerHTML='';
+      tabs.forEach((t,i)=>{const d=document.createElement('div');d.className='tab'+(i===cur?' on':'');d.innerHTML=`<span>${esc(t.title)}</span><button aria-label="Cerrar pestaña">✕</button>`;
+        d.onclick=e=>{if(e.target.tagName==='BUTTON')close(i);else{cur=i;show()}};tabsEl.appendChild(d)});
+      const p=document.createElement('button');p.className='plus';p.textContent='+';p.setAttribute('aria-label','Nueva pestaña');p.onclick=()=>add();tabsEl.appendChild(p)}
+    if(document.activeElement!==om)om.value=(T()&&T().url)||''}
+  function show(){tabs.forEach((t,i)=>t.box.style.display=i===cur?'':'none');bar(true)}
+  function add(){const t={box:document.createElement('div'),fr:null,url:'',title:'Nueva pestaña'};t.box.className='sjt';page.appendChild(t.box);tabs.push(t);cur=tabs.length-1;home(t);show()}
+  function close(i){tabs[i].box.remove();tabs.splice(i,1);if(!tabs.length)return add();cur=Math.min(cur,tabs.length-1);show()}
+  const W=()=>{try{return T().fr.frame.contentWindow}catch{return null}};
+  bk.onclick=()=>{const w=W();if(w)w.history.back()};fw.onclick=()=>{const w=W();if(w)w.history.forward()};rl.onclick=()=>{const w=W();if(w)w.location.reload()};
+  om.addEventListener('keydown',e=>{if(e.key==='Enter'){go(om.value);om.blur()}});om.addEventListener('focus',()=>om.select());
+  const iv=setInterval(()=>{
+    if(!root.isConnected){clearInterval(iv);return}
+    tabs.forEach(t=>{if(!t.fr)return;try{const w=t.fr.frame.contentWindow;let u=null;
+      try{u=SJC.decodeUrl(w.location.href)}catch{}
+      if(!u||/^https?:\/\/[^/]+\/scramjet\//.test(u)){const m=w.location.href.match(/\/scramjet\/(.+)$/);if(m)try{u=decodeURIComponent(m[1])}catch{}}
+      if(u&&/^https?:/.test(u))t.url=u;
+      const ti=w.document&&w.document.title;if(ti)t.title=ti.slice(0,30)}catch{}});
+    bar()},800);
+  add();
+}
+const B1=browser;
+browser=(root,w)=>SJ()?sjBrowser(root,w):B1(root,w);
+
+/* ---- Gemini sin API: Nano (Chrome) y Gemini web por proxy ---- */
+async function nano(b){
+  const json=(o,s=200)=>new Response(JSON.stringify(o),{status:s,headers:{'content-type':'application/json'}});
+  try{
+    const LM=window.LanguageModel||(window.ai&&window.ai.languageModel);
+    if(!LM)return json({error:{message:'Este navegador no trae Gemini Nano. Solo Chrome de escritorio reciente (activa la Prompt API en chrome://flags).'}},500);
+    if(LM.availability&&(await LM.availability())==='unavailable')return json({error:{message:'Gemini Nano no está disponible en este equipo.'}},500);
+    const msgs=b.messages.map(m=>({role:m.role==='assistant'?'assistant':'user',content:typeof m.content==='string'?m.content:(m.content||[]).filter(x=>x.type==='text').map(x=>x.text).join('\n')})),last=msgs.pop();
+    const ses=await LM.create({initialPrompts:msgs});
+    return json({content:[{type:'text',text:await ses.prompt(last.content)}]});
+  }catch(e){return json({error:{message:String(e&&e.message||e)}},500)}
+}
+LOCAL['local-nano']=[];
+MODELS.push(['local-nano','Gemini Nano (Chrome)','Sin API · solo Chrome de escritorio','default']);
+Object.assign(IC,{gem:'<svg viewBox="0 0 48 48"><rect width="48" height="48" rx="11" fill="#fff"/><path d="M24 7c1.6 9.2 7.8 15.4 17 17-9.2 1.6-15.4 7.8-17 17-1.6-9.2-7.8-15.4-17-17 9.2-1.6 15.4-7.8 17-17z" fill="#4c8df6"/></svg>'});
+Object.assign(APPS,{gem:'Gemini'});
+XAPPS.gem={n:'Gemini',f:root=>{const b=document.createElement('div');b.style.cssText='position:relative;flex:1;padding:10px;overflow:auto';root.appendChild(b);
+  if(SJ())sjLoad(b,'https://gemini.google.com/app');else b.innerHTML='<div class="ym">Gemini web necesita el servidor con proxy (Scramjet). Aquí todavía no está activo.</div>'}};
+
 /* ---- apps nuevas por defecto en barra y escritorio (una vez por usuario) ---- */
 const L0=loadU;
 loadU=u=>{L0(u);if(!u){S.d.chats=[];save()}if(!S.d.v3){S.d.v3=1;['pins','desk'].forEach(k=>S.d[k].push('ig','tt'));save();rend()}
+  if(!S.d.v6){S.d.v6=1;S.d.desk.push('gem');save();rend()}
   if(!S.d.v5){S.d.v5=1;['pins','desk'].forEach(k=>S.d[k].push('cam','mus'));save();rend()}
   if(!S.d.v4){S.d.v4=1;['pins','desk'].forEach(k=>{if(!S.d[k].includes('yt'))S.d[k].push('yt')});save();rend()}};
 loadU(S.user);
